@@ -1,0 +1,133 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer.html">
+
+<!-- shared styles for all views -->
+<dom-module id="shared-styles">
+  <template>
+    <style is="custom-style" include="app-grid-style">
+      :host {
+        display: block;
+        --app-grid-columns: 2;
+        --app-grid-gutter: 10px;
+      }
+      ul {
+        padding: 0;
+        list-style: none;
+      }
+      h1 {
+        font-family: 'Roboto', 'Noto', sans-serif;
+        text-align: center;
+        font-size: 18px;
+        line-height: 30px;
+        font-weight: 400;
+        margin: 10px 20px;
+      }
+      .item {
+        list-style: none;
+        background-color: white;
+      }
+      @media (min-width: 800px) {
+        .item:nth-child(5n+1) {
+          @apply(--app-grid-expandible-item);
+        }
+      }
+      @media (max-width: 799px) {
+        :host {
+          --app-grid-columns: 2;
+          --app-grid-gutter: 5px;
+          --app-grid-expandible-item-columns: 2;
+        }
+        .item:nth-child(3n+1) {
+          @apply(--app-grid-expandible-item);
+        }
+      }
+
+      paper-button.custom {
+        --paper-button-ink-color: var(--paper-pink-a200);
+        /* These could also be individually defined for each of the
+          specific css classes, but we'll just do it once as an example */
+        --paper-button-flat-keyboard-focus: {
+          background-color: var(--paper-pink-a200);
+          color: white !important;
+        };
+        --paper-button-raised-keyboard-focus: {
+          background-color: var(--paper-pink-a200) !important;
+          color: white !important;
+        };
+      }
+      paper-button.custom:hover {
+        background-color: var(--paper-indigo-400);
+      }
+      paper-button.pink:hover{
+        background-color: var(--paper-pink-a100);
+      }
+      paper-button.pink {
+        background-color: var(--paper-pink-a200);
+        color : white;
+      }
+      paper-button.indigo {
+        background-color: var(--paper-indigo-500);
+        color: white;
+        --paper-button-raised-keyboard-focus: {
+          background-color: var(--paper-pink-a200) !important;
+          color: white !important;
+        };
+      }
+      paper-button.green:hover{
+        background-color: var(--paper-green-300);
+      }
+      paper-button.green {
+        background-color: var(--paper-green-500);
+        color: white;
+      }
+      paper-button.green[active] {
+        background-color: var(--paper-red-500);
+      }
+      paper-button.disabled {
+        color: white;
+      }
+      .card {
+        margin: 24px;
+        padding: 16px;
+
+        color: #757575;
+        border-radius: 5px;
+        background-color: #fff;
+        box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+      }
+
+      .circle {
+        display: inline-block;
+
+        width: 64px;
+        height: 64px;
+
+        text-align: center;
+
+        color: #555;
+        border-radius: 50%;
+        background: #ddd;
+
+        font-size: 30px;
+        line-height: 64px;
+      }
+      .blue{
+        background-color: #4285f4;
+        color:white;
+      }
+
+      .light{
+        	border-color:#e7e6dd;
+      }
+    </style>
+  </template>
+</dom-module>

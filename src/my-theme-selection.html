@@ -1,0 +1,233 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/app-layout/app-grid/app-grid-style.html">
+<link rel="import" href="../bower_components/paper-material/paper-material.html">
+<link rel="import" href="elements/talk-viewer.html">
+<!--<link rel="import" href="shared-styles.html">-->
+
+<dom-module id="my-theme-selection">
+  <template>
+  <style include="shared-styles">
+
+  </style>
+
+    <!-- Filter input -->
+    <div class="card">
+      <paper-input id="themeInput" label="Search a theme..." on-input="filter"></paper-input>
+    </div>
+
+    <!-- No filter results -->
+    <template  class="card" if="{{noFilter}}" is="dom-if">
+      <h1>Themes</h1>
+      <div class="card light">
+        <template is="dom-repeat" items="[[talks]]">
+            <talk-viewer talk={{item}} style="margin-bottom:1%;"></talk-viewer>
+        </template>
+      </div>
+    </template>
+
+    <!-- Filter results -->
+    <div class="app-grid">
+      <!-- Filter exact match -->
+      <template class="item" if="{{!noFilter}}" is="dom-if">
+        <div id="matchContent">
+          <h1>Results</h1>
+          <template is="dom-if" if="{{!hasThemes}}">
+            <div class="card">
+              <h1>No results found...</h1>
+            </div>
+          </template>
+          <template is="dom-repeat" items="[[matchedThemes]]">
+            <div class="card">
+              <talk-viewer talk={{item}}></talk-viewer>
+            </div>
+          </template>
+        </div>
+      </template>
+
+      <!-- Filter suggestion (close match) -->
+      <template class="item" if="{{!noFilter}}" is="dom-if">
+        <div id="suggestedContent">
+          <h1>Suggestions</h1>
+          <template id="themeSuggestionTemplate" is="dom-repeat" items="[[suggestedThemes]]">
+            <div class="card">
+              <talk-viewer talk={{item}}></talk-viewer>
+            </div>
+          </template>
+        </div>
+      </template>
+    </div>
+
+    <iron-ajax
+      id="getTheme"
+      url="http://localhost:8081/talks"
+      handle-as="json"
+      on-response="handleTalksResponse"
+      debounce-duration="300">
+    </iron-ajax>
+  </template>
+
+  <script>
+  Polymer({
+    is: 'my-theme-selection',
+    properties: {
+      talks:{
+        type: Array
+      },
+      matchedThemes: {
+        type: Array
+      },
+      hasThemes: {
+        type : Boolean
+      },
+      suggestedThemes: {
+        type: Array
+      },
+      hasSuggestions: {
+        type : Boolean
+      },
+      noResults: {
+        type: Boolean
+      }
+    },
+    filter : function()
+    {
+      var input = this.$.themeInput.value;
+      this.noFilter = input.length == 0;
+      this.hasThemes = false;
+      this.hasSuggestions = false;
+      this.matchedThemes = [];
+      this.suggestedThemes = [];
+
+      // Start filtering
+      if(!this.noFilter)
+      {
+        // if input not empty
+        if(input)
+        {
+          var inputSplit = input.split(" ");
+
+          // For each talks
+          for(var i = 0 ; i < this.talks.length; i++)
+          {
+
+            // For each words of the theme
+            var themeSplit = this.talks[i].theme.split(" ");
+            for(var j = 0 ; j < themeSplit.length ; j++)
+            {
+
+              // For each words of the input
+              var found = false;
+              for(var k = 0 ; k < inputSplit.length; k++)
+              {
+
+                // look for exact match in response (case insensitive)
+                if(themeSplit[j].toLowerCase() == inputSplit[k].toLowerCase())
+                {
+                  this.hasThemes = true;
+                  this.push('matchedThemes',this.talks[i]);
+                  found = true;
+                  break;
+                }
+
+                // Or look for close matches using edit distance
+                else if(normalizedLevenshtein(themeSplit[j],input) > 0.6)
+                {
+                  this.hasSuggestions = true;
+                  this.push('suggestedThemes', this.talks[i]);
+                  found = true;
+                  break;
+                }
+              }// end for input words
+
+              if(found) break;
+
+            }// end for theme words
+          }// end for talks
+        }// end filter mode
+      }// end function
+      this.noResults = !this.noFilter && !this.hasThemes && !this.hasSuggestions;
+      console.log("No results : "+this.noResults);
+    },
+    ready: function () {
+      this.$.getTheme.generateRequest();
+    },
+    handleTalksResponse: function (data) {
+      this.talks = data.detail.response;
+      this.noFilter = true;
+    },
+    attached: function() {
+      this._updateGridStyles = this._updateGridStyles || function() {
+        this.updateStyles();
+      }.bind(this);
+      window.addEventListener('resize', this._updateGridStyles);
+    },
+    detached: function() {
+      window.removeEventListener('resize', this._updateGridStyles);
+    }
+  });
+  </script>
+</dom-module>
+
+
+<script>
+function normalizedLevenshtein(a,b)
+{
+  return 1 - levenshtein(a,b)/max(a.length,b.length);
+}
+
+function max(a,b)
+{
+  return a > b ? a:b;
+}
+
+function levenshtein(a, b){
+  if(a.length == 0) return b.length;
+  if(b.length == 0) return a.length;
+
+  // case insensitive
+  a = a.toLowerCase();
+  b = b.toLowerCase();
+
+  var matrix = [];
+
+  // increment along the first column of each row
+  var i;
+  for(i = 0; i <= b.length; i++){
+    matrix[i] = [i];
+  }
+
+  // increment each column in the first row
+  var j;
+  for(j = 0; j <= a.length; j++){
+    matrix[0][j] = j;
+  }
+
+  // Fill in the rest of the matrix
+  for(i = 1; i <= b.length; i++){
+    for(j = 1; j <= a.length; j++){
+      if(b.charAt(i-1) == a.charAt(j-1)){
+        matrix[i][j] = matrix[i-1][j-1];
+      } else {
+        matrix[i][j] = Math.min(matrix[i-1][j-1] + 1, // substitution
+                                Math.min(matrix[i][j-1] + 1, // insertion
+                                         matrix[i-1][j] + 1)); // deletion
+      }
+    }
+  }
+
+  return matrix[b.length][a.length];
+};
+</script>

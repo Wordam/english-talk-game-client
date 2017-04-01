@@ -1,0 +1,59 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/iron-collapse/iron-collapse.html">
+<link rel="import" href="../../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../shared-styles.html">
+<!--
+
+This dom-module is used to display a keyword element
+Attributes :
+  keyword : the keyword element
+
+-->
+<dom-module id="keywords-viewer" attributes="keyword">
+  <template>
+    <style include="shared-styles">
+    :host {
+      display: block;
+      --app-grid-columns: 3;
+    }
+    </style>
+
+    <!-- Card header -->
+    <div class="card-content blue" on-click="toggle">
+      <p><strong>{{keyword.keyword}}</strong></p>
+      <iron-icon id="talkCardIcon" icon="icons:arrow-drop-down" style="float:right;">
+      </iron-icon>
+    </div>
+
+    <!-- Card content -->
+    <div class="card-actions">
+      <iron-collapse id="more" style="width:100%;display:block">
+        <div>
+          <p>Keyword translation : <strong>{{keyword.keywordTranslation}}</strong></p>
+          <p>Suggested sentence : <strong>{{keyword.suggestedSentence}}</strong></p>
+          <p>Suggested sentence translation : <strong>{{keyword.suggestedSentenceTranslation}}</strong></p>
+        </div>
+      </iron-collapse>
+    </div>
+
+  </template>
+
+  <script>
+    Polymer({
+      is: 'keywords-viewer',
+      ready: function()
+      {
+      },
+      toggle: function() {
+        var moreInfo = this.$.more;
+        var talkCardIcon = this.$.talkCardIcon;
+        talkCardIcon.icon = moreInfo.opened ? 'icons:arrow-drop-down'
+                                          : 'icons:arrow-drop-up';
+        moreInfo.toggle();
+      }
+    });
+  </script>
+</dom-module>

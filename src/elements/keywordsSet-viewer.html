@@ -1,0 +1,76 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/app-layout/app-grid/app-grid-style.html">
+<link rel="import" href="../../bower_components/paper-card/paper-card.html">
+<link rel="import" href="keywords-viewer.html">
+<!--
+
+This dom-module is used to display a set of keywords elements
+Attributes :
+  set : the set of keywords
+  index : the index of the set of keywords
+
+-->
+<dom-module id="keywordsSet-viewer" attributes="set index">
+  <template>
+    <style include="shared-styles">
+    :host {
+      display: block;
+      --app-grid-columns: 2;
+    }
+    </style>
+
+    <h2>Keywords set {{index}}</h2>
+    <paper-card class="app-grid">
+        <div class="item">
+          <h3>First player</h3>
+          <template is="dom-repeat" items="{{set.firstPlayerKeywords}}">
+            <paper-card class="blue">{{item.keyword}}</paper-card>
+          </template>
+        </div>
+        <div class="item">
+          <h3>Second player</h3>
+          <template is="dom-repeat" items="{{set.secondPlayerKeywords}}">
+            <paper-card on-click="toggleKeyword(item)" class="blue">{{item.keyword}}</paper-card>
+          </template>
+        </div>
+
+        <!-- Display selected keyword -->
+        <template is="dom-if" if="{{hasSelection}}">
+          <keywords-viewer keyword={{selectedItem}}></keywordsViewer>
+        </template>
+    </paper-card>
+
+  </template>
+
+  <script>
+    Polymer({
+      is: 'keywordsSet-viewer',
+      properties: {
+        selectedItem: {
+          type: Array
+        },
+        hasSelection: {
+          type: Boolean
+        }
+      },
+      ready: function()
+      {
+        this.selectedItem = {};
+      },
+      toggleKeyword: function(e)
+      {
+        console.log("toggle keyword!");
+        // if is the same -> close
+        var item = e.model.item;
+        if(this.selectedItem == item)
+        {
+          this.selectedItem = {};
+        }else
+        {
+          this.selectedItem = item;
+        }
+        hasSelection = this.selectedItem == {};
+      }
+    });
+  </script>
+</dom-module>
